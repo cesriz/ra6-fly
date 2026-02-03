@@ -39,7 +39,7 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
-    echo "<h1>Conexión exitosa a PostgreSQL (Railway)</h1>";
+    echo "<h1>Conexión exitosa a PostgreSQL (Railway) para la tarea de Fly Cesar Ruiz Capel</h1>";
 
     $stmt = $pdo->query("SELECT id, name FROM users ORDER BY id ASC");
     $users = $stmt->fetchAll();
