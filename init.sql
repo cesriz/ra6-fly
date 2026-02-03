@@ -1,8 +1,10 @@
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(100)
+  name VARCHAR(100) UNIQUE
 );
 
--- Usamos esta sintaxis para evitar errores si los datos ya existen
-INSERT INTO users (name) VALUES ('Admin');
-INSERT INTO users (name) VALUES  ('User');
+INSERT INTO users (name) VALUES ('Admin')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO users (name) VALUES ('User')
+ON CONFLICT (name) DO NOTHING;
