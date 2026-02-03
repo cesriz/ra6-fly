@@ -21,17 +21,8 @@ if (!$host || !$user || !$dbname) {
     exit;
 }
 
-// Soporte para ?sslmode=require
-$sslmode = null;
-if (!empty($dbConfig['query'])) {
-    parse_str($dbConfig['query'], $q);
-    $sslmode = $q['sslmode'] ?? null;
-}
+$dsn = "pgsql:host=$host;port=$port;dbname=$dbname;sslmode=require";
 
-$dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
-if ($sslmode) {
-    $dsn .= ";sslmode=$sslmode";
-}
 
 try {
     $pdo = new PDO($dsn, $user, $pass, [
