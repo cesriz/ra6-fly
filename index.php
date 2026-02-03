@@ -1,37 +1,53 @@
 <?php
-// Tu cadena de conexión (Lo ideal es que esto venga de getenv('DATABASE_URL'))
-$databaseUrl = "postgresql://fly-user:tPZ1lHoJxuKM7vHh3KbEB9Xh@pgbouncer.z23750v7myl096d1.flympg.net/fly-db";
+$databaseUrl = getenv('DATABASE_URL');
 
-// Parseamos la URL para extraer los componentes
+if (!$databaseUrl) {
+    echo "<h1>Falta DATABASE_URL</h1>";
+    echo "<p>Configura la variable DATABASE_URL en Railway.</p>";
+    exit;
+}
+
 $dbConfig = parse_url($databaseUrl);
 
-// Extraemos los datos necesarios
-$host   = $dbConfig['host'];
-$user   = $dbConfig['user'];
-$pass   = $dbConfig['pass'];
-$port   = $dbConfig['port'] ?? 5432; // Puerto por defecto de Postgres
-$dbname = ltrim($dbConfig['path'], '/');
+$host   = $dbConfig['host'] ?? null;
+$user   = $dbConfig['user'] ?? null;
+$pass   = $dbConfig['pass'] ?? null;
+$port   = $dbConfig['port'] ?? 5432;
+$dbname = isset($dbConfig['path']) ? ltrim($dbConfig['path'], '/') : null;
 
-// Construimos el DSN (Data Source Name)
+if (!$host || !$user || !$dbname) {
+    echo "<h1>DATABASE_URL inválida</h1>";
+    echo "<pre>" . htmlspecialchars($databaseUrl) . "</pre>";
+    exit;
+}
+
+// Soporte para ?sslmode=require
+$sslmode = null;
+if (!empty($dbConfig['query'])) {
+    parse_str($dbConfig['query'], $q);
+    $sslmode = $q['sslmode'] ?? null;
+}
+
 $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+if ($sslmode) {
+    $dsn .= ";sslmode=$sslmode";
+}
 
 try {
-    // Creamos la conexión PDO
     $pdo = new PDO($dsn, $user, $pass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
 
-    echo "<h1>Conexión exitosa a PostgreSQL</h1>";
+    echo "<h1>Conexión exitosa a PostgreSQL (Railway)</h1>";
 
-    // Consultamos la tabla 'users' que crea tu script init.sql
-    $stmt = $pdo->query("SELECT id, name FROM users");
+    $stmt = $pdo->query("SELECT id, name FROM users ORDER BY id ASC");
     $users = $stmt->fetchAll();
 
     if ($users) {
         echo "<h3>Cuentas de usuarios:</h3><ul>";
-        foreach ($users as $user) {
-            echo "<li>ID: " . $user['id'] . " - Nombre: " . htmlspecialchars($user['name']) . "</li>";
+        foreach ($users as $u) {
+            echo "<li>ID: " . (int)$u['id'] . " - Nombre: " . htmlspecialchars($u['name']) . "</li>";
         }
         echo "</ul>";
     } else {
@@ -40,5 +56,6 @@ try {
 
 } catch (PDOException $e) {
     echo "<h1>Error de conexión</h1>";
-    echo "<p>" . $e->getMessage() . "</p>";
+    echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
 }
+
