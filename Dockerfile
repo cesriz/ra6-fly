@@ -18,7 +18,7 @@ RUN printf '%s\n' \
 '' \
 'if [ -n "$DATABASE_URL" ] && [ -f /app/init.sql ]; then' \
 '  echo "Inicializando base de datos..."' \
-'  psql "$DATABASE_URL" -f /app/init.sql || true' \
+'  psql "$DATABASE_URL" -f /app/init.sql' \
 'fi' \
 '' \
 'echo "Arrancando PHP en puerto ${PORT:-8080}..."' \
