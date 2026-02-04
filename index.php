@@ -1,7 +1,6 @@
 <?php
 $databaseUrl = getenv('DATABASE_URL');
 
-echo "<pre>DATABASE_URL=" . htmlspecialchars($databaseUrl) . "</pre>";
 
 if (!$databaseUrl) {
     echo "<h1>Falta DATABASE_URL</h1>";
